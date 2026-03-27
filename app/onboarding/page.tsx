@@ -1,89 +1,131 @@
 'use client'
 
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { savePreferences } from '@/app/actions/user';
+import { Button } from "@/components/ui/button";
+import { updatePersonalizedFeed } from "@/app/actions/user";
+import { supabase } from '@/lib/supabase';
+import { BrainCircuit, Check, Sparkles, Newspaper } from "lucide-react";
 
-const TOPICS = [
-    "Startups & VC", "Stock Markets", "Artificial Intelligence",
-    "Crypto & Web3", "Personal Finance", "Real Estate",
-    "Global Economy", "Green Energy", "Corporate Mergers"
+const INTEREST_TOPICS = [
+    "Startups & VC", "Stock Markets", "Generative AI",
+    "Crypto & Web3", "Real Estate", "Electric Vehicles",
+    "Global Economy", "Green Energy", "Corporate Mergers",
+    "Consumer Tech", "Banking & FinTech", "Retail Trends"
 ];
 
 export default function OnboardingPage() {
-    const router = useRouter();
-    const [userId, setUserId] = useState<string | null>(null);
-    const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+    const [selected, setSelected] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
+    const [status, setStatus] = useState("Selecting Interests...");
+    const router = useRouter();
 
-    // Get the logged-in user's ID when the page loads
+    // Ensure user is actually logged in before they can onboard
     useEffect(() => {
-        const getUser = async () => {
+        const checkUser = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) router.push('/login');
-            else setUserId(session.user.id);
         };
-        getUser();
+        checkUser();
     }, [router]);
 
     const toggleTopic = (topic: string) => {
-        if (selectedTopics.includes(topic)) {
-            setSelectedTopics(selectedTopics.filter(t => t !== topic));
+        if (selected.includes(topic)) {
+            setSelected(selected.filter(t => t !== topic));
         } else {
-            if (selectedTopics.length < 5) setSelectedTopics([...selectedTopics, topic]);
+            if (selected.length < 5) setSelected([...selected, topic]);
         }
     };
 
-    const handleSave = async () => {
-        if (!userId || selectedTopics.length === 0) return;
+    const handleStartAI = async () => {
+        if (selected.length === 0) return;
         setLoading(true);
+        setStatus("Gemini is analyzing your interests...");
 
-        // Call our Server Action to vectorize and save!
-        const result = await savePreferences(userId, selectedTopics);
+        try {
+            // 1. Call our Server Action to generate the AI Vector
+            const result = await updatePersonalizedFeed(selected);
 
-        if (result.success) {
-            router.push('/dashboard'); // Teleport them to their new personalized feed!
-        } else {
-            alert("Error saving preferences. Please try again.");
+            if (result.success) {
+                setStatus("AI Profile Generated. Securing Newsroom...");
+                setTimeout(() => router.push('/dashboard'), 1500);
+            } else {
+                alert("Error creating profile: " + result.error);
+                setLoading(false);
+            }
+        } catch (err) {
+            console.error(err);
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6 text-zinc-50">
-            <div className="max-w-2xl w-full space-y-8">
-                <div className="text-center">
-                    <h1 className="text-4xl font-bold tracking-tight mb-2">Build Your AI Profile</h1>
-                    <p className="text-zinc-400">Select up to 5 topics. Our AI will map your selections into a mathematical vector to find perfect news matches.</p>
-                </div>
+        <div className="min-h-screen bg-[#FDFDFD] text-[#1A1A1A] flex flex-col items-center justify-center p-6">
 
-                <div className="flex flex-wrap justify-center gap-3 mt-8">
-                    {TOPICS.map((topic) => (
-                        <button
-                            key={topic}
-                            onClick={() => toggleTopic(topic)}
-                            className={`px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 border 
-                ${selectedTopics.includes(topic)
-                                ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20'
-                                : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'}`}
-                        >
-                            {topic}
-                        </button>
-                    ))}
+            {/* HEADER SECTION */}
+            <div className="max-w-2xl w-full text-center mb-12">
+                <div className="flex justify-center mb-6">
+                    <div className="p-3 bg-[#B31921]/5 rounded-full border border-[#B31921]/20">
+                        <BrainCircuit className="w-8 h-8 text-[#B31921]" />
+                    </div>
                 </div>
+                <h1 className="text-4xl md:text-5xl font-serif font-black tracking-tight mb-4">
+                    Vectorize Your <span className="text-[#B31921]">ET</span> Feed
+                </h1>
+                <p className="text-zinc-500 font-medium text-sm max-w-lg mx-auto leading-relaxed">
+                    Select up to 5 topics. Our AI will map these into a 768-dimension vector to ensure your 2026 newsroom is fundamentally unique to your professional goals.
+                </p>
+            </div>
 
-                <div className="pt-8 flex justify-center">
-                    <Button
-                        size="lg"
-                        onClick={handleSave}
-                        disabled={selectedTopics.length === 0 || loading}
-                        className="w-full sm:w-auto px-12 bg-white text-black hover:bg-zinc-200 rounded-full"
+            {/* TOPIC GRID */}
+            <div className="max-w-3xl w-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-12">
+                {INTEREST_TOPICS.map((topic) => (
+                    <button
+                        key={topic}
+                        onClick={() => toggleTopic(topic)}
+                        disabled={loading}
+                        className={`group relative p-4 border-2 transition-all duration-300 text-left h-24 flex flex-col justify-between
+              ${selected.includes(topic)
+                            ? 'border-[#B31921] bg-[#B31921]/5'
+                            : 'border-zinc-100 bg-white hover:border-zinc-300'}`}
                     >
-                        {loading ? 'Generating AI Vector...' : 'Generate My Newsroom'}
-                    </Button>
-                </div>
+            <span className={`text-[10px] font-black uppercase tracking-widest 
+              ${selected.includes(topic) ? 'text-[#B31921]' : 'text-zinc-400'}`}>
+              Topic
+            </span>
+                        <span className="font-bold text-sm leading-tight">{topic}</span>
+                        {selected.includes(topic) && (
+                            <Check className="absolute top-3 right-3 w-4 h-4 text-[#B31921]" />
+                        )}
+                    </button>
+                ))}
+            </div>
+
+            {/* SUBMIT BUTTON */}
+            <div className="max-w-2xl w-full text-center">
+                <Button
+                    size="lg"
+                    onClick={handleStartAI}
+                    disabled={selected.length === 0 || loading}
+                    className="w-full sm:w-80 h-16 bg-[#B31921] hover:bg-black text-white rounded-none font-bold text-lg tracking-widest shadow-xl shadow-[#B31921]/20"
+                >
+                    {loading ? (
+                        <span className="flex items-center gap-2 animate-pulse">
+               <Sparkles size={20} /> {status}
+            </span>
+                    ) : (
+                        'GENERATE MY NEWSROOM'
+                    )}
+                </Button>
+                <p className="mt-6 text-[10px] font-black text-zinc-300 uppercase tracking-[0.3em]">
+                    Processing via Google Gemini 1.5 & Supabase Vector
+                </p>
+            </div>
+
+            {/* FOOTER BADGE */}
+            <div className="mt-16 flex items-center gap-2 text-[10px] text-zinc-400 font-bold uppercase tracking-widest opacity-50">
+                <Newspaper size={14} />
+                <span>Press Credentials Pending Selection</span>
             </div>
         </div>
     );
