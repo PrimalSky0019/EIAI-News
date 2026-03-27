@@ -2,38 +2,67 @@
 
 import { embed } from 'ai';
 import { google } from '@ai-sdk/google';
-import { createClient } from '@supabase/supabase-js';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 
-// Setup Supabase for the server
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+export async function updatePersonalizedFeed(topics: string[]) {
+    // 1. Await cookies (Required in modern Next.js)
+    const cookieStore = await cookies();
 
-export async function savePreferences(userId: string, topics: string[]) {
+    const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                get(name: string) {
+                    return cookieStore.get(name)?.value;
+                },
+                // Added set/remove so the client can handle sessions correctly
+                set(name, value, options) {
+                    cookieStore.set({ name, value, ...options });
+                },
+                remove(name, options) {
+                    cookieStore.set({ name, value: '', ...options });
+                },
+            },
+        }
+    );
+
+    // 2. Get User
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+        return { success: false, error: "Authentication failed. Please log in again." };
+    }
+
     try {
-        // 1. Turn their topics into a natural language sentence
-        const preferenceText = `This user is a professional interested in business news specifically regarding: ${topics.join(', ')}.`;
+        // 3. Generate a "Context Sentence" for Gemini
+        const interestDescription = `A business professional interested in: ${topics.join(', ')}. Focus on market impacts and strategic moves.`;
 
-        // 2. Ask Gemini to turn that sentence into a 768-dimension vector
+        // 4. Generate the Vector Embedding (768 dimensions)
         const { embedding } = await embed({
             model: google.textEmbeddingModel('text-embedding-004'),
-            value: preferenceText,
+            value: interestDescription,
         });
 
-        // 3. Save this vector to their profile in the database
-        const { error } = await supabase
+        // 5. Save to Supabase 'profiles' table
+        const { error: dbError } = await supabase
             .from('profiles')
-            .update({ preference_embedding: embedding })
-            .eq('id', userId);
+            .update({
+                preference_embedding: embedding,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', user.id);
 
-        if (error) {
-            console.error("Supabase Error:", error);
-            return { success: false, error: error.message };
+        if (dbError) {
+            console.error("Database Error:", dbError);
+            return { success: false, error: dbError.message };
         }
 
         return { success: true };
+
     } catch (error) {
-        console.error("AI Error:", error);
-        return { success: false, error: 'Failed to generate AI profile.' };
+        console.error("AI Embedding Error:", error);
+        return { success: false, error: "Failed to analyze interests with AI." };
     }
 }
