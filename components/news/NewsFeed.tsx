@@ -1,38 +1,44 @@
 import { supabase } from '@/lib/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export async function NewsFeed() {
-    // Fetch the latest articles from your database
-    const { data: articles, error } = await supabase
-        .from('articles')
-        .select('*')
-        .order('published_at', { ascending: false });
+export async function NewsFeed({ isPersonalized = false }) {
+    let articles = [];
 
-    if (error) {
-        console.error("Error fetching articles:", error);
-        return <div className="text-red-500">Failed to load news feed.</div>;
-    }
+    if (isPersonalized) {
+        // 1. Get the logged-in user
+        const { data: { user } } = await supabase.auth.getUser();
 
-    if (!articles || articles.length === 0) {
-        return <div className="text-zinc-500 mt-8 text-center">No articles found. Add some!</div>;
+        // 2. Fetch their AI preference vector from the profiles table
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('preference_embedding')
+            .eq('id', user?.id)
+            .single();
+
+        if (profile?.preference_embedding) {
+            // 3. Call the "match_articles" function we wrote in Supabase SQL!
+            const { data: matchedNews } = await supabase.rpc('match_articles', {
+                query_embedding: profile.preference_embedding,
+                match_threshold: 0.5,
+                match_count: 10,
+            });
+            articles = matchedNews;
+        }
+    } else {
+        // Standard landing page feed (unauthenticated)
+        const { data } = await supabase.from('articles').select('*').limit(5);
+        articles = data || [];
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12 w-full max-w-4xl mx-auto text-left">
-            {articles.map((article) => (
-                <Card key={article.id} className="bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-colors">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12 w-full max-w-4xl mx-auto">
+            {articles.map((article: any) => (
+                <Card key={article.id} className="bg-zinc-900 border-zinc-800">
                     <CardHeader>
-                        <div className="text-xs text-blue-500 font-bold uppercase tracking-wider mb-2">
-                            {article.category}
-                        </div>
-                        <CardTitle className="text-zinc-100 leading-snug">
-                            {article.title}
-                        </CardTitle>
+                        <CardTitle className="text-zinc-100">{article.title}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-zinc-400 line-clamp-3 text-sm">
-                            {article.content}
-                        </p>
+                        <p className="text-zinc-400 line-clamp-2">{article.content}</p>
                     </CardContent>
                 </Card>
             ))}
