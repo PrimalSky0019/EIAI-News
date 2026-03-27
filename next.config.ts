@@ -1,8 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  reactCompiler: true,
+  reactStrictMode: false, // This stops the double-loading that confuses Supabase!
 };
 
 export default nextConfig;
