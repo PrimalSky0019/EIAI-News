@@ -20,23 +20,24 @@ export default function AuthPage() {
 
         if (isSignUp) {
             // Create a brand new user
-            const { data, error } = await supabase.auth.signUp({
-                email,
-                password,
-            });
-            if (error) alert(error.message);
-            else {
-                alert("Success! Please check your email to verify your account (if email confirmation is turned on in Supabase), or just sign in!");
-                setIsSignUp(false);
+            const { data, error } = await supabase.auth.signUp({ email, password });
+
+            if (error) {
+                alert(error.message);
+            } else {
+                // Send new users to the onboarding screen to pick their topics!
+                router.push('/onboarding');
             }
         } else {
             // Log in an existing user
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-            });
-            if (error) alert(error.message);
-            else router.push('/dashboard'); // Send them to the personalized screen!
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                alert(error.message);
+            } else {
+                // Existing users go straight to their dashboard
+                router.push('/dashboard');
+            }
         }
 
         setLoading(false);
@@ -81,6 +82,7 @@ export default function AuthPage() {
 
                 <div className="text-center mt-4">
                     <button
+                        type="button"
                         onClick={() => setIsSignUp(!isSignUp)}
                         className="text-sm text-zinc-400 hover:text-white transition-colors"
                     >
