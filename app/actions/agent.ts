@@ -1,17 +1,17 @@
 'use server'
 
-import { generateText, embed, tool } from 'ai';
+import { generateText, embed, tool, stepCountIs } from 'ai';
 import { google } from '@ai-sdk/google';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { z } from 'zod';
-import { fetchNewsFromRSS } from '@/lib/news-fetcher';
+import { fetchLiveNews } from '@/lib/news-fetcher';
 
 // Initialize Supabase Admin for background ingestion
 function getSupabaseAdmin() {
     return createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!, // Must use Service Role to bypass RLS when ingesting
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
         { cookies: { get() { return null; }, set() {}, remove() {} } }
     );
 }
@@ -21,7 +21,7 @@ export async function executeAgentInstruction(userInstruction: string) {
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        { cookies: { get(name) { return cookieStore.get(name)?.value; } } }
+        { cookies: { get(name: string) { return cookieStore.get(name)?.value; } } }
     );
 
     try {
@@ -42,7 +42,7 @@ export async function executeAgentInstruction(userInstruction: string) {
         // 2. The Autonomous Agent Execution
         const { text, steps } = await generateText({
             model: google('gemini-2.0-flash'),
-            maxSteps: 5, // Allows the agent to use a tool, look at the result, and use another tool
+            stopWhen: stepCountIs(5), // Allow up to 5 tool-calling steps
             system: `
             You are the Chief Intelligence Agent for The AI Times.
             Your job is to answer the user's request. 
@@ -58,29 +58,28 @@ export async function executeAgentInstruction(userInstruction: string) {
             `,
             prompt: userInstruction,
             tools: {
-                // TOOL 1: Fetch live news from the internet via Google News RSS
+                // TOOL 1: Fetch live news from ET RSS feeds
                 fetchLiveNews: tool({
                     description: 'Fetch real-time news articles from the web based on a query.',
-                    parameters: z.object({
+                    inputSchema: z.object({
                         query: z.string().describe('The topic to search for (e.g., "AI regulations", "Tesla stock")'),
                     }),
-                    execute: async ({ query }) => {
+                    execute: async ({ query }: { query: string }) => {
                         console.log(`[AGENT TOOL] Fetching live news for: ${query}`);
                         
-                        // Fetch real news from Google News RSS
-                        const liveResults = await fetchNewsFromRSS(query, 5);
+                        const liveResults = await fetchLiveNews(5);
                         
                         if (liveResults.length === 0) {
                             return [{ 
                                 title: `No results found for: ${query}`,
-                                content: `Unable to fetch live articles for "${query}". The RSS feed may be temporarily unavailable.`,
+                                content: `Unable to fetch live articles. The RSS feed may be temporarily unavailable.`,
                                 category: "Live Feed"
                             }];
                         }
                         
                         return liveResults.map(a => ({
                             title: a.title,
-                            content: a.content,
+                            content: a.raw_text,
                             category: a.category,
                         }));
                     },
@@ -89,12 +88,12 @@ export async function executeAgentInstruction(userInstruction: string) {
                 // TOOL 2: Process and save the news to Supabase
                 ingestToDatabase: tool({
                     description: 'Vectorize and save an article to the secure intelligence database.',
-                    parameters: z.object({
+                    inputSchema: z.object({
                         title: z.string(),
                         content: z.string(),
                         category: z.string(),
                     }),
-                    execute: async ({ title, content, category }) => {
+                    execute: async ({ title, content, category }: { title: string; content: string; category: string }) => {
                         console.log(`[AGENT TOOL] Ingesting: ${title}`);
                         const adminDb = getSupabaseAdmin();
 
@@ -119,7 +118,7 @@ export async function executeAgentInstruction(userInstruction: string) {
             }
         });
 
-        // Map the steps so the UI can show the user what the agent did in the background
+        // Map the steps so the UI can show the user what the agent did
         const toolExecutions = steps
             .filter(step => step.toolCalls && step.toolCalls.length > 0)
             .flatMap(step => step.toolCalls.map(tc => tc.toolName));

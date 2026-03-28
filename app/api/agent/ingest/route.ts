@@ -16,13 +16,13 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const processedArticles = [];
+    const processedArticles: string[] = [];
 
     try {
         console.log("Agent Initialized: Fetching Live News...");
         
         // 1. Fetch REAL news from ET RSS feeds
-        const liveNews = await fetchLiveNews(2); // Get top 2 articles from each source
+        const liveNews = await fetchLiveNews(2);
 
         for (const article of liveNews) {
             console.log(`\nProcessing: ${article.title}`);

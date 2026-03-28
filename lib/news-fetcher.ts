@@ -14,6 +14,7 @@ const NEWS_SOURCES = [
         url: "https://economictimes.indiatimes.com/tech/rssfeeds/13357270.cms",
         category: "Technology"
     }
+
 ];
 
 export async function fetchLiveNews(limitPerSource = 3) {
