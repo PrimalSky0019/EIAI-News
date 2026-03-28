@@ -1,5 +1,0 @@
-app/dashboard/profile/page.tsx(93,35): error TS2322: Type '() => Promise<{ success: boolean; error: string; }>' is not assignable to type 'string | ((formData: FormData) => void | Promise<void>) | undefined'.
-  Type '() => Promise<{ success: boolean; error: string; }>' is not assignable to type '(formData: FormData) => void | Promise<void>'.
-    Type 'Promise<{ success: boolean; error: string; }>' is not assignable to type 'void | Promise<void>'.
-      Type 'Promise<{ success: boolean; error: string; }>' is not assignable to type 'Promise<void>'.
-        Type '{ success: boolean; error: string; }' is not assignable to type 'void'.

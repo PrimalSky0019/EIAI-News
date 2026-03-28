@@ -10,7 +10,6 @@ import { Newspaper, ShieldCheck, Zap, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { logger } from '@/lib/logger';
 import { isAuthError } from '@/lib/types';
-import * as Sentry from '@sentry/nextjs';
 
 export default function AuthPage() {
     const [email, setEmail] = useState('');
@@ -50,7 +49,6 @@ export default function AuthPage() {
             }
         } catch (error) {
             logger.error("Authentication error", error);
-            Sentry.captureException(error);
             
             let errorMessage = 'Authentication failed';
             

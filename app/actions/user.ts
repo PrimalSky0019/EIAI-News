@@ -5,7 +5,6 @@ import { google } from '@ai-sdk/google';
 import { createClient } from '@/lib/supabase/server';
 import { logger, formatErrorMessage } from '@/lib/logger';
 import type { ServerActionResponse } from '@/lib/types';
-import * as Sentry from '@sentry/nextjs';
 
 /**
  * Updates user's personalized feed preferences with AI-generated embeddings
@@ -27,7 +26,6 @@ export async function updatePersonalizedFeed(
 
   if (authError || !user) {
     logger.error('Authentication failed in updatePersonalizedFeed', authError);
-    if (authError) Sentry.captureException(authError);
     return { success: false, error: 'Authentication failed. Please log in again.' };
   }
 
@@ -54,7 +52,6 @@ export async function updatePersonalizedFeed(
 
     if (dbError) {
       logger.error('Database error in updatePersonalizedFeed', dbError);
-      Sentry.captureException(dbError);
       return { success: false, error: 'Failed to save preferences' };
     }
 
@@ -67,7 +64,6 @@ export async function updatePersonalizedFeed(
 
   } catch (error) {
     logger.error('AI Embedding error in updatePersonalizedFeed', error);
-    Sentry.captureException(error);
     return { success: false, error: formatErrorMessage(error) };
   }
 }
