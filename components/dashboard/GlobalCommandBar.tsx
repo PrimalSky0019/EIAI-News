@@ -142,7 +142,7 @@ export default function GlobalCommandBar() {
                                         <button
                                             key={prompt}
                                             onClick={() => handleSend(undefined, prompt)}
-                                            className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest border border-zinc-200 bg-white text-zinc-500 hover:border-[#ED1C24] hover:text-[#ED1C24] transition-colors cursor-pointer"
+                                            className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest border-2 border-zinc-200 bg-white text-zinc-600 hover:border-[#ED1C24] hover:text-[#ED1C24] hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(237,28,36,0.1)] transition-all duration-200 cursor-pointer active:translate-y-0"
                                         >
                                             {prompt}
                                         </button>
@@ -152,7 +152,7 @@ export default function GlobalCommandBar() {
                         )}
 
                         {messages.map((m, i) => (
-                            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-slide-up-fade`}>
                                 <div className={`flex flex-col gap-2 max-w-[85%] ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
 
                                     {/* Tool Badges */}
@@ -190,10 +190,15 @@ export default function GlobalCommandBar() {
                         ))}
 
                         {loading && (
-                            <div className="flex justify-start animate-in fade-in duration-300">
-                                <div className="p-4 bg-[#F9F3E9]/40 border border-[#E5E5E5] text-zinc-600 font-serif text-sm flex items-center gap-3 shadow-sm">
-                                    <Loader2 className="animate-spin text-[#ED1C24]" size={16} />
-                                    Synthesizing intelligence...
+                            <div className="flex justify-start animate-slide-up-fade">
+                                <div className="w-full max-w-[400px]">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <BrainCircuit size={16} className="text-[#ED1C24] animate-pulse" />
+                                        <span className="text-[10px] font-bold uppercase tracking-tighter text-zinc-400">Scanning Intelligence Streams...</span>
+                                    </div>
+                                    <div className="h-1 w-full bg-zinc-100 overflow-hidden relative">
+                                        <div className="absolute inset-0 bg-[#ED1C24] w-1/3 animate-shimmer-scan" />
+                                    </div>
                                 </div>
                             </div>
                         )}

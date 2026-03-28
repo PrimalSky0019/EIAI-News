@@ -27,18 +27,36 @@
   }
 }
 
-/* Brand color utility classes
-   Usage: bg-brand, text-brand, border-brand
-   Note: Current design uses hardcoded #B31921 for consistency.
-   Use 'brand' color for new components.
-*/
-
-/* Live ticker marquee animation */
+/* UI Animations & Themes */
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
 
+@keyframes shimmer-scan {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes slide-up-fade {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .animate-marquee {
   animation: marquee 30s linear infinite;
+}
+
+.animate-shimmer-scan {
+  animation: shimmer-scan 2s ease-in-out infinite;
+}
+
+.animate-slide-up-fade {
+  animation: slide-up-fade 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.bg-newsprint {
+  background-color: #fdfdfd;
+  background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+  background-attachment: fixed;
 }

@@ -44,7 +44,7 @@ export async function POST(req: Request) {
             // 3. Vectorize Agent
             console.log("   - Generating vector embeddings...");
             const { embedding } = await embed({
-                model: google.textEmbeddingModel('text-embedding-004'),
+                model: google.textEmbeddingModel('gemini-embedding-2-preview'),
                 value: synthesizedContent,
             });
 

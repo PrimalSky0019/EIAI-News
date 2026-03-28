@@ -37,7 +37,7 @@ export async function updatePersonalizedFeed(
 
     // Generate 768-dimensional vector embedding
     const { embedding } = await embed({
-      model: google.textEmbeddingModel('text-embedding-004'),
+      model: google.textEmbeddingModel('gemini-embedding-2-preview'),
       value: interestDescription,
     });
 

@@ -28,7 +28,7 @@ export async function ingestArticle(
   try {
     // Generate 768-dimensional vector embedding using Gemini
     const { embedding } = await embed({
-      model: google.textEmbeddingModel('text-embedding-004'),
+      model: google.textEmbeddingModel('gemini-embedding-2-preview'),
       value: `Title: ${title}\n\nContent: ${content}`,
     });
 

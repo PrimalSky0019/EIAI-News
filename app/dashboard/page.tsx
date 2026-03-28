@@ -94,7 +94,7 @@ export default async function DashboardPage() {
 
     return (
         <DashboardShell userEmail={user.email}>
-            <div className="space-y-6">
+            <div className="space-y-6 bg-newsprint min-h-screen p-1 md:p-4">
                 
                 {/* ET Style Ticker / KPI Row */}
                 <div className="bg-white border border-zinc-200 shadow-sm flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-zinc-200 text-black">
@@ -134,14 +134,14 @@ export default async function DashboardPage() {
                     <div className="lg:col-span-3 space-y-6">
                         
                         {/* Top Story */}
-                        <div className="bg-white border border-zinc-200 shadow-sm p-6 relative">
+                        <div className="bg-white border-2 border-zinc-200 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.05)] p-6 relative hover:shadow-[8px_8px_0px_0px_rgba(237,28,36,0.1)] hover:border-[#ED1C24]/30 transition-all duration-300 group cursor-default">
                             {/* Decorative Corner Line */}
                             <div className="absolute top-0 left-0 w-8 h-1 bg-[#ED1C24]" />
                             
                             <h2 className="text-[10px] font-bold text-[#ED1C24] uppercase tracking-widest mb-3 flex items-center gap-2 border-b-2 border-black inline-block pb-1">
                                 Top Story
                                 {profile?.preference_embedding && (
-                                    <span className="bg-[#ED1C24]/10 text-[#ED1C24] px-1.5 py-0.5 ml-2">MY MATCH</span>
+                                    <span className="bg-gradient-to-r from-amber-400 to-[#ED1C24] text-white px-2 py-0.5 ml-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] animate-pulse">MY MATCH</span>
                                 )}
                             </h2>
                             
@@ -179,7 +179,7 @@ export default async function DashboardPage() {
                         {secondaryArticles.length > 0 && (
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 {secondaryArticles.map((article: any, i: number) => (
-                                    <div key={article.id} className={`bg-white p-5 border border-zinc-200 shadow-sm flex flex-col justify-between ${i === 0 ? 'border-t-4 border-t-[#ED1C24]' : ''}`}>
+                                    <div key={article.id} className={`bg-white p-5 border-2 border-zinc-200 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.05)] flex flex-col justify-between hover:shadow-[8px_8px_0px_0px_rgba(237,28,36,0.1)] hover:border-[#ED1C24]/30 transition-all duration-300 group ${i === 0 ? 'border-t-4 border-t-[#ED1C24]' : ''}`}>
                                         <div>
                                             <div className="text-[10px] font-bold text-[#ED1C24] uppercase tracking-widest mb-2">
                                                 {article.category || 'Update'}

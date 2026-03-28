@@ -1,11 +1,17 @@
 'use server'
 
 import { generateText, embed, tool, stepCountIs } from 'ai';
-import { google } from '@ai-sdk/google';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { groq } from '@ai-sdk/groq';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { fetchLiveNews } from '@/lib/news-fetcher';
+
+// Custom provider instance to allow for future configuration if needed
+const googleModel = createGoogleGenerativeAI({
+    apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+});
 
 // Admin client for background ingestion (bypasses RLS)
 function getSupabaseAdmin() {
@@ -22,38 +28,38 @@ export async function executeAgentInstruction(userInstruction: string) {
     try {
         // 1. Context Retrieval (Standard RAG)
         const { embedding: queryVector } = await embed({
-            model: google.textEmbeddingModel('text-embedding-004'),
+            model: googleModel.textEmbeddingModel('gemini-embedding-2-preview'),
             value: userInstruction,
         });
 
         const { data: localContext } = await supabase.rpc('match_articles', {
             query_embedding: queryVector,
             match_threshold: 0.1,
-            match_count: 3,
+            match_count: 5, // Increased context for richer Gemini-style responses
         });
 
         const contextString = localContext?.map((a: any) => `Title: ${a.title}\nContent: ${a.content}`).join('\n\n') || "No local data found.";
 
-        // 2. The Autonomous Agent Execution with Full Tool Suite
+        // 2. The Autonomous Agent Execution with Full Tool Suite (Groq Engine)
         const { text, steps } = await generateText({
-            model: google('gemini-2.0-flash'),
-            stopWhen: stepCountIs(5),
+            model: groq('llama3-8b-8192'), // Switched to Groq for interactivity
+            stopWhen: stepCountIs(8), // Allow for multi-step research
             system: `
-            You are the Chief Intelligence Agent for The AI Times.
-            Your job is to answer the user's request using your available tools.
-            
-            Current Local Database Context:
+            You are the Leading Intelligence Agent for The AI Times. 
+            Your goal is to provide deep, analytical, and highly structured briefings in the style of a premium business intelligence report.
+
+            PERSONA & STYLE:
+            - Professional, insightful, and comprehensive (like a senior financial editor).
+            - Always use Markdown: Use **Bold** for entities, ### Headers for sections, and Bullet points for lists.
+            - Structure: Summary -> Detailed Analysis -> Key Takeaways/Market Impact.
+
+            RAG KNOWLEDGE BASE:
             ${contextString}
-            
-            INSTRUCTIONS:
-            - If asked about a specific keyword, company, or person, use 'searchNews'.
-            - If asked for news in a category (tech, markets, etc.), use 'getNewsByCategory'.
-            - For conceptual or semantic queries, use 'semanticSearch' for AI-powered vector matches.
-            - If asked about user preferences or interests, use 'getUserPreferences'.
-            - If asked to "fetch", "find", or "ingest" NEW live information, use 'fetchLiveNews'.
-            - Once you fetch new articles, use 'ingestToDatabase' to save them.
-            - If the local context is sufficient to answer, respond directly without tools.
-            - Format your final response in clean Markdown.
+
+            OPERATIONAL RULES:
+            1. If asked for a specific topic, always try 'searchNews' and 'semanticSearch' first.
+            2. For live or missing info, use 'fetchLiveNews' and immediately 'ingestToDatabase' result.
+            3. Answer in detail. If the user asks for a summary, provide a thorough multi-section briefing.
             `,
             prompt: userInstruction,
             tools: {
@@ -100,7 +106,7 @@ export async function executeAgentInstruction(userInstruction: string) {
                     }),
                     execute: async ({ topic }: { topic: string }) => {
                         const { embedding } = await embed({
-                            model: google.textEmbeddingModel('text-embedding-004'),
+                            model: googleModel.textEmbeddingModel('gemini-embedding-2-preview'),
                             value: topic,
                         });
                         const { data } = await supabase.rpc('match_articles', {
@@ -135,7 +141,7 @@ export async function executeAgentInstruction(userInstruction: string) {
                     }),
                     execute: async ({ query }: { query: string }) => {
                         console.log(`[AGENT TOOL] Fetching live news for: ${query}`);
-                        const liveResults = await fetchLiveNews(5);
+                        const liveResults = await fetchLiveNews(2);
                         if (liveResults.length === 0) {
                             return [{
                                 title: `No results found for: ${query}`,
@@ -163,7 +169,7 @@ export async function executeAgentInstruction(userInstruction: string) {
                         console.log(`[AGENT TOOL] Ingesting: ${title}`);
                         const adminDb = getSupabaseAdmin();
                         const { embedding } = await embed({
-                            model: google.textEmbeddingModel('text-embedding-004'),
+                            model: googleModel.textEmbeddingModel('gemini-embedding-2-preview'),
                             value: content,
                         });
                         const { error } = await adminDb.from('articles').insert({
