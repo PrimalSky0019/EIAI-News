@@ -1,7 +1,5 @@
-.next/dev/types/validator.ts(53,39): error TS2306: File 'C:/Users/vedya/WebstormProjects/aieinews/app/dashboard/arc/page.tsx' is not a module.
-.next/dev/types/validator.ts(62,39): error TS2306: File 'C:/Users/vedya/WebstormProjects/aieinews/app/dashboard/my-et/page.tsx' is not a module.
-.next/dev/types/validator.ts(89,39): error TS2306: File 'C:/Users/vedya/WebstormProjects/aieinews/app/dashboard/video/page.tsx' is not a module.
-.next/types/validator.ts(53,39): error TS2306: File 'C:/Users/vedya/WebstormProjects/aieinews/app/dashboard/arc/page.tsx' is not a module.
-.next/types/validator.ts(62,39): error TS2306: File 'C:/Users/vedya/WebstormProjects/aieinews/app/dashboard/my-et/page.tsx' is not a module.
-.next/types/validator.ts(89,39): error TS2306: File 'C:/Users/vedya/WebstormProjects/aieinews/app/dashboard/video/page.tsx' is not a module.
-app/actions/ingest.ts(5,31): error TS2307: Cannot find module '@/lib/supabaseAdmin' or its corresponding type declarations.
+app/dashboard/profile/page.tsx(93,35): error TS2322: Type '() => Promise<{ success: boolean; error: string; }>' is not assignable to type 'string | ((formData: FormData) => void | Promise<void>) | undefined'.
+  Type '() => Promise<{ success: boolean; error: string; }>' is not assignable to type '(formData: FormData) => void | Promise<void>'.
+    Type 'Promise<{ success: boolean; error: string; }>' is not assignable to type 'void | Promise<void>'.
+      Type 'Promise<{ success: boolean; error: string; }>' is not assignable to type 'Promise<void>'.
+        Type '{ success: boolean; error: string; }' is not assignable to type 'void'.
