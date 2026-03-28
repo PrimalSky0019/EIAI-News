@@ -4,8 +4,7 @@ import { useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
-    LayoutGrid, Compass, BarChart2, BrainCircuit,
-    Settings, Search, Bell, Plus, LogOut, Menu, X
+    Search, Bell, User, LogOut, Menu, X
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -28,117 +27,145 @@ export default function DashboardShell({
     }
 
     const navItems = [
-        { name: "Home", href: "/dashboard", icon: LayoutGrid },
-        { name: "Navigator", href: "/dashboard/navigator", icon: Compass },
-        { name: "Analytics", href: "/dashboard/analytics", icon: BarChart2 },
-        { name: "Intelligence", href: "/dashboard/intelligence", icon: BrainCircuit },
-        { name: "Settings", href: "/dashboard/profile", icon: Settings },
+        { name: "Top News", href: "/dashboard" },
+        { name: "Market Navigator", href: "/dashboard/navigator" },
+        { name: "Analytics", href: "/dashboard/analytics" },
+        { name: "My Profile", href: "/dashboard/profile" },
     ]
 
-    const userName = userEmail ? userEmail.split('@')[0] : "Member"
-    const formattedDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    const userName = userEmail ? userEmail.split('@')[0] : "Subscriber"
+    const formattedDate = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })
+    const etRed = "#ED1C24"; // The signature red color
 
     return (
-        <div className="min-h-screen bg-[#09090B] text-zinc-100 flex flex-col md:flex-row font-sans selection:bg-[#B31921] selection:text-white">
+        <div className="min-h-screen bg-[#FDFDFD] text-black font-sans selection:bg-[#ED1C24] selection:text-white">
 
-            {/* Mobile Header (Visible only on small screens) */}
-            <header className="md:hidden bg-[#09090B] border-b border-white/10 p-4 flex justify-between items-center sticky top-0 z-50">
-                <h1 className="text-xl font-serif font-black tracking-tighter flex items-center gap-2">
-                    THE AI TIMES <div className="w-1.5 h-1.5 rounded-full bg-[#B31921]" />
-                </h1>
-                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-zinc-400 hover:text-white">
+            {/* Top Red Bar */}
+            <div className="w-full h-1 bg-[#ED1C24]" />
+
+            {/* Utility Header (Date, Login) */}
+            <div className="w-full border-b border-zinc-200 bg-white hidden md:block">
+                <div className="max-w-7xl mx-auto px-4 flex justify-between items-center py-1">
+                    <div className="flex gap-4 text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
+                        <span>{formattedDate}</span>
+                        <span className="text-[#ED1C24]">Edition: GLOBAL</span>
+                    </div>
+                    <div className="flex gap-4 items-center text-[11px] font-bold text-zinc-500 uppercase">
+                        <span className="tracking-widest capitalize">Welcome, {userName}</span>
+                        <div className="h-3 w-px bg-zinc-300" />
+                        <button onClick={handleLogout} className="hover:text-[#ED1C24] transition-colors flex items-center gap-1">
+                            LOGOUT <LogOut size={10} />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Mobile Header */}
+            <header className="md:hidden bg-white border-b border-zinc-200 p-4 flex justify-between items-center sticky top-0 z-50">
+                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-zinc-600">
                     {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
+                <h1 className="text-2xl font-serif font-black tracking-tighter text-black flex items-center gap-1">
+                    THE AI TIMES <div className="w-2 h-2 bg-[#ED1C24] mt-1" />
+                </h1>
+                <User size={20} className="text-zinc-600" />
             </header>
 
-            {/* Dark Sidebar */}
-            <aside className={`
-                fixed md:sticky top-0 left-0 h-screen w-full md:w-64 bg-[#09090B] border-r border-white/10 flex flex-col z-40 transition-transform duration-300 ease-in-out
-                ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-            `}>
-                <div className="p-6 hidden md:block">
-                    <h1 className="text-xl font-serif font-black tracking-tighter flex items-center gap-2">
-                        THE AI TIMES <div className="w-1.5 h-1.5 rounded-full bg-[#B31921]" />
+            {/* Main Desktop Masthead */}
+            <header className="hidden md:flex flex-col bg-white border-b-4 border-black sticky top-0 z-40 shadow-sm">
+                
+                {/* Logo Row */}
+                <div className="max-w-7xl mx-auto w-full px-4 py-6 flex justify-between items-end">
+                    <h1 className="text-5xl font-serif font-black tracking-tighter text-black flex items-start leading-[0.8]">
+                        THE AI TIMES <div className="w-3 h-3 bg-[#ED1C24]" />
                     </h1>
-                </div>
-
-                <nav className="flex-grow px-4 py-6 space-y-1 overflow-y-auto">
-                    {navItems.map((item) => {
-                        const isActive = pathname === item.href;
-                        const Icon = item.icon;
-                        return (
-                            <Link
-                                key={item.name}
-                                href={item.href}
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all ${isActive
-                                    ? "bg-white/10 text-white"
-                                    : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
-                                    }`}
-                            >
-                                <Icon size={18} className={isActive ? "text-[#B31921]" : ""} />
-                                {item.name}
-                            </Link>
-                        );
-                    })}
-                </nav>
-
-                {/* User Profile Section */}
-                <div className="p-4 mt-auto border-t border-white/5 md:border-t-0">
-                    <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between group cursor-pointer hover:bg-white/10 transition-colors">
-                        <div className="flex items-center gap-3 overflow-hidden">
-                            <div className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-tr from-zinc-800 to-zinc-600 flex items-center justify-center font-bold text-sm uppercase border border-white/10">
-                                {userName.charAt(0)}
-                            </div>
-                            <div className="truncate">
-                                <p className="text-sm font-bold text-white capitalize truncate">{userName}</p>
-                                <p className="text-[10px] font-bold text-[#B31921] uppercase tracking-widest truncate">Pro Member</p>
-                            </div>
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center bg-zinc-50 border border-zinc-300 px-3 py-1.5 focus-within:border-black transition-colors">
+                            <input 
+                                type="text" 
+                                placeholder="Search news, quotes, topics..." 
+                                className="bg-transparent border-none outline-none text-xs w-64 placeholder:text-zinc-400 font-serif italic"
+                            />
+                            <Search size={14} className="text-zinc-400" />
                         </div>
-                        <button onClick={handleLogout} className="text-zinc-500 hover:text-white transition-colors p-2 shrink-0">
-                            <LogOut size={16} />
-                        </button>
                     </div>
                 </div>
-            </aside>
+
+                {/* Navigation Row */}
+                <nav className="w-full bg-[#FAFAFA] border-t border-zinc-200">
+                    <div className="max-w-7xl mx-auto px-4 flex">
+                        {navItems.map((item, index) => {
+                            const isActive = pathname === item.href;
+                            return (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    className={`py-2.5 px-5 text-xs font-black uppercase tracking-widest transition-colors flex items-center
+                                        ${index !== 0 ? 'border-l border-zinc-300' : ''} 
+                                        ${isActive 
+                                            ? "text-[#ED1C24] bg-white border-t-2 border-t-[#ED1C24]" 
+                                            : "text-black hover:text-[#ED1C24] hover:bg-white border-t-2 border-t-transparent"
+                                        }`}
+                                >
+                                    {item.name}
+                                </Link>
+                            )
+                        })}
+                    </div>
+                </nav>
+            </header>
+
+            {/* Mobile Nav Overlay */}
+            {isMobileMenuOpen && (
+                <div className="md:hidden fixed inset-0 top-[60px] bg-white z-40 border-t border-zinc-200 overflow-y-auto">
+                    <div className="p-4 space-y-4">
+                        <div className="flex items-center bg-zinc-50 border border-zinc-300 px-3 py-2 w-full">
+                            <input 
+                                type="text" 
+                                placeholder="Search..." 
+                                className="bg-transparent outline-none text-sm w-full"
+                            />
+                            <Search size={16} className="text-zinc-400" />
+                        </div>
+                        <nav className="flex flex-col border-t border-zinc-200">
+                            {navItems.map((item) => (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="py-4 border-b border-zinc-100 text-sm font-bold uppercase tracking-widest"
+                                >
+                                    {item.name}
+                                </Link>
+                            ))}
+                            <button onClick={handleLogout} className="py-4 text-sm font-bold uppercase tracking-widest text-zinc-500 text-left">
+                                Logout
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+            )}
 
             {/* Main Content Area */}
-            <main className="flex-grow flex flex-col relative overflow-hidden md:h-screen md:overflow-y-auto w-full">
-
-                {/* Top Header (Desktop Only) */}
-                <header className="hidden md:flex sticky top-0 z-20 bg-[#09090B]/80 backdrop-blur-md border-b border-white/10 px-8 py-5 items-center justify-between">
-                    <div>
-                        <h2 className="text-2xl font-serif font-bold text-white capitalize">Morning, {userName}.</h2>
-                        <p className="text-zinc-500 text-xs font-medium uppercase tracking-widest mt-1">
-                            Your AI-Matched Intelligence Briefing
-                        </p>
-                    </div>
-
-                    <div className="flex items-center gap-6">
-                        <span className="text-sm font-medium text-zinc-400">{formattedDate}</span>
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
-                            <input
-                                type="text"
-                                placeholder="Search intelligence..."
-                                className="bg-white/5 border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all w-64"
-                            />
-                        </div>
-                        <button className="relative text-zinc-400 hover:text-white transition-colors">
-                            <Bell size={20} />
-                            <span className="absolute top-0 right-0 w-2 h-2 bg-[#B31921] rounded-full border-2 border-[#09090B]"></span>
-                        </button>
-                        <button className="bg-white text-black p-2 rounded-full hover:bg-zinc-200 transition-colors">
-                            <Plus size={20} />
-                        </button>
-                    </div>
-                </header>
-
-                {/* Dashboard Content Injection */}
-                <div className="p-4 md:p-8">
+            <main className="w-full bg-[#f8f9fa] pt-6 pb-20">
+                <div className="max-w-7xl mx-auto px-4">
                     {children}
                 </div>
             </main>
+
+            {/* ET Style Footer */}
+            <footer className="w-full bg-zinc-900 border-t-4 border-[#ED1C24] text-white py-12">
+                 <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
+                     <div>
+                         <h2 className="text-2xl font-serif font-black tracking-tighter flex items-start leading-none mb-4 text-white">
+                            THE AI TIMES <div className="w-2 h-2 bg-[#ED1C24]" />
+                         </h2>
+                         <p className="text-zinc-400 text-xs leading-relaxed font-serif italic">
+                             An AI-powered intelligence feed inspired by premier financial journalism.
+                         </p>
+                     </div>
+                 </div>
+            </footer>
         </div>
     )
 }

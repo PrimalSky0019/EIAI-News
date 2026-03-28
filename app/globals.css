@@ -32,3 +32,13 @@
    Note: Current design uses hardcoded #B31921 for consistency.
    Use 'brand' color for new components.
 */
+
+/* Live ticker marquee animation */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
