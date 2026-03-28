@@ -42,7 +42,7 @@ export async function executeAgentInstruction(userInstruction: string) {
 
         // 2. The Autonomous Agent Execution with Full Tool Suite (Groq Engine)
         const { text, steps } = await generateText({
-            model: groq('llama3-8b-8192'), // Switched to Groq for interactivity
+            model: groq('llama-3.3-70b-versatile'), // Switched to latest Groq model for stability
             stopWhen: stepCountIs(8), // Allow for multi-step research
             system: `
             You are the Leading Intelligence Agent for The AI Times. 
