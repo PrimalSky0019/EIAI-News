@@ -6,21 +6,26 @@ import { TrendingUp, Activity, Zap, Clock, ChevronRight } from 'lucide-react'
 
 // Dynamic category-based images from Unsplash
 const CATEGORY_IMAGES: Record<string, string> = {
-    'Technology': 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop',
-    'Markets': 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=2070&auto=format&fit=crop',
-    'AI': 'https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=2070&auto=format&fit=crop',
-    'Startups': 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?q=80&w=2070&auto=format&fit=crop',
-    'Policy': 'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?q=80&w=2070&auto=format&fit=crop',
-    'Regulation': 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=2070&auto=format&fit=crop',
-    'Global Economy': 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=2070&auto=format&fit=crop',
-    'Automotive': 'https://images.unsplash.com/photo-1549317661-bd32c8ce0afa?q=80&w=2070&auto=format&fit=crop',
-    'Finance': 'https://images.unsplash.com/photo-1554260570-e9689a3418b8?q=80&w=2070&auto=format&fit=crop',
+    'technology': 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop',
+    'tech': 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop',
+    'markets': 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=2070&auto=format&fit=crop',
+    'ai': 'https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=2070&auto=format&fit=crop',
+    'startups': 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?q=80&w=2070&auto=format&fit=crop',
+    'policy': 'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?q=80&w=2070&auto=format&fit=crop',
+    'regulation': 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=2070&auto=format&fit=crop',
+    'global economy': 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=2070&auto=format&fit=crop',
+    'economy': 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=2070&auto=format&fit=crop',
+    'macro': 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=2070&auto=format&fit=crop',
+    'automotive': 'https://images.unsplash.com/photo-1549317661-bd32c8ce0afa?q=80&w=2070&auto=format&fit=crop',
+    'finance': 'https://images.unsplash.com/photo-1554260570-e9689a3418b8?q=80&w=2070&auto=format&fit=crop',
+    'healthcare': 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=2070&auto=format&fit=crop',
+    'energy': 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=2070&auto=format&fit=crop',
     'default': 'https://images.unsplash.com/photo-1504711434969-e33886168d6c?q=80&w=2070&auto=format&fit=crop',
 };
 
 function getCategoryImage(category?: string): string {
     if (!category) return CATEGORY_IMAGES['default'];
-    return CATEGORY_IMAGES[category] || CATEGORY_IMAGES['default'];
+    return CATEGORY_IMAGES[category.toLowerCase()] || CATEGORY_IMAGES['default'];
 }
 
 // Basic time formatting

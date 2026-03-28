@@ -10,7 +10,6 @@ export const logger = {
     if (isDevelopment) {
       console.error(`[ERROR] ${message}`, error);
     }
-    // In production, you could send to error tracking service (Sentry, etc.)
   },
 
   warn: (message: string, data?: unknown) => {
