@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Bot, User, Send, Sparkles } from "lucide-react"
 
+import { BrainCircuit } from 'lucide-react'
+
 export default function NewsNavigator() {
     const [messages, setMessages] = useState([
         { role: 'assistant', content: "Hello! I've analyzed today's ET coverage. What business story can I help you deconstruct?" }
@@ -78,5 +80,3 @@ export default function NewsNavigator() {
         </div>
     )
 }
-
-import { BrainCircuit } from 'lucide-react'

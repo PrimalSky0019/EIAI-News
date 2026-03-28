@@ -1,158 +1,154 @@
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { NewsFeed } from "@/components/news/NewsFeed";
-import { HeroButtons } from "@/components/HeroButtons";
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 import {
-    Newspaper,
-    TrendingUp,
-    Mic2,
-    PlayCircle,
-    Languages,
-    BrainCircuit,
-    Sparkles,
-    Clock,
-    ArrowRight
+    Zap, BrainCircuit, PlayCircle,
+    History, Languages, ArrowRight, ShieldCheck
 } from "lucide-react";
 
-export default function ETLandingPage() {
+export default function LandingPage() {
     return (
-        <main className="min-h-screen bg-[#FDFDFD] text-[#1A1A1A] selection:bg-[#B31921]/10">
+        <div className="min-h-screen bg-[#FDFDFD] text-[#1A1A1A] selection:bg-primary selection:text-white">
 
-            {/* 1. TOP TICKER */}
-            <div className="w-full bg-[#1A1A1A] text-white py-1.5 px-8 text-[10px] font-bold tracking-widest flex justify-between uppercase">
-                <div className="flex gap-4">
-                    <span>SENSEX 73,583.22 <span className="text-red-500">▼ -1690.1</span></span>
-                    <span className="hidden sm:inline text-zinc-500">|</span>
-                    <span className="hidden sm:inline">NIFTY 22,123.45 <span className="text-green-500">▲ +142.3</span></span>
-                </div>
-                <span>27 MARCH 2026 | 11:50 PM IST</span>
-                <span className="text-yellow-500 animate-pulse">● LIVE: AI NEWSROOM ENGINE ONLINE</span>
-            </div>
-
-            {/* 2. MASTHEAD */}
-            <header className="border-b-4 border-black py-10 text-center bg-white">
-                <h1 className="text-7xl md:text-9xl font-serif font-black tracking-tighter text-[#B31921]">
-                    THE AI TIMES
+            {/* --- TOP NAVIGATION --- */}
+            <nav className="fixed top-0 w-full z-50 bg-[#FDFDFD]/90 backdrop-blur-md border-b border-zinc-200 h-20 px-6 md:px-12 flex items-center justify-between">
+                <h1 className="text-3xl font-serif font-black tracking-tighter text-primary">
+                    ET<span className="text-black italic">AI</span>
                 </h1>
-                <p className="mt-2 text-sm font-bold uppercase tracking-[0.3em] text-zinc-400">
-                    The Personalized Business Newsroom of 2026
-                </p>
-            </header>
-
-            {/* 3. HERO NAVIGATION */}
-            <nav className="border-b border-zinc-200 sticky top-0 bg-white/90 backdrop-blur-md z-50">
-                <div className="max-w-7xl mx-auto flex items-center justify-center gap-10 py-4 text-[11px] font-black uppercase tracking-widest">
-                    <a href="#feed" className="hover:text-[#B31921] transition-colors">Personalized Feed</a>
-                    <a href="#features" className="hover:text-[#B31921] transition-colors">Intelligence Suite</a>
-                    <Link href="/login" className="text-[#B31921] border-b-2 border-[#B31921]">★ Prime Exclusives</Link>
-                    <a href="#features" className="hover:text-[#B31921] transition-colors text-zinc-400">Story Arc</a>
+                <div className="flex items-center gap-4">
+                    <Link href="/login">
+                        <Button variant="ghost" className="text-[10px] font-black uppercase tracking-widest hidden md:inline-flex">
+                            Member Login
+                        </Button>
+                    </Link>
+                    <Link href="/login">
+                        <Button className="bg-primary hover:bg-black text-white rounded-none px-8 font-black text-[10px] uppercase tracking-widest transition-all">
+                            Initialize Newsroom
+                        </Button>
+                    </Link>
                 </div>
             </nav>
 
-            {/* 4. MAIN HERO SECTION */}
-            <section className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 p-8 pt-16">
-                <div className="lg:col-span-8 border-r border-zinc-200 pr-12">
-                    <div className="inline-block bg-[#B31921] text-white px-3 py-1 text-[10px] font-bold mb-6 tracking-tighter">
-                        EDITORIAL VISION 2026
-                    </div>
-                    <h2 className="text-6xl md:text-8xl font-serif font-bold leading-[0.85] tracking-tighter mb-8">
-                        Static homepages are a relic of 2005.
-                        <span className="italic text-zinc-300"> We fixed it.</span>
-                    </h2>
-                    <p className="text-xl text-zinc-600 leading-relaxed mb-10 max-w-2xl font-medium">
-                        Stop digging through noise. Our AI synthesizes real-time ET data into a
-                        fundamentally unique newsroom built specifically for your portfolio, industry, and language.
+            {/* --- HERO SECTION --- */}
+            <main className="pt-40 pb-20 px-6 md:px-12 max-w-7xl mx-auto">
+                <div className="border-t-8 border-black pt-12">
+                    <p className="text-[12px] font-black uppercase tracking-[0.5em] text-primary mb-6">
+                        The Newsroom Revolution — Amaravati 2026
                     </p>
-                    <HeroButtons />
-                </div>
-
-                <div className="lg:col-span-4 space-y-8">
-                    <h3 className="border-b-2 border-black pb-2 font-black text-xs uppercase tracking-widest">
-                        Intelligence Suite
-                    </h3>
-                    <FeatureItem icon={<Mic2 size={18}/>} title="Interactive Briefings" desc="Chat directly with Union Budget reports & live earnings." />
-                    <FeatureItem icon={<PlayCircle size={18}/>} title="AI Video Studio" desc="Articles auto-rendered into 60s shorts with data visuals." />
-                    <FeatureItem icon={<Languages size={18}/>} title="Vernacular Engine" desc="Culturally adapted news in Hindi, Tamil, and 10 others." />
-                    <FeatureItem icon={<TrendingUp size={18}/>} title="Story Arc Tracker" desc="Visual narrative mapping of ongoing corporate moves." />
-                </div>
-            </section>
-
-            {/* 5. THE FEATURE DEEP-DIVE (The "Why We Are Better" Section) */}
-            <section id="features" className="bg-[#1A1A1A] text-white py-24">
-                <div className="max-w-7xl mx-auto px-8">
-                    <div className="flex items-center gap-4 mb-16">
-                        <h2 className="text-4xl font-serif font-bold italic text-[#B31921]">The Transformation</h2>
-                        <div className="h-px flex-1 bg-zinc-800"></div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
-                        <FeatureCard
-                            icon={<Sparkles className="text-[#B31921]" />}
-                            title="My ET: Personalized"
-                            desc="Not just a filter. A mutual fund investor gets portfolio-relevant shifts; a startup founder gets funding news and competitor moves."
-                        />
-                        <FeatureCard
-                            icon={<BrainCircuit className="text-[#B31921]" />}
-                            title="News Navigator"
-                            desc="Don't read 8 separate articles. Interact with a single AI-powered deep briefing that synthesizes all ET coverage into one explorable document."
-                        />
-                        <FeatureCard
-                            icon={<Clock className="text-[#B31921]" />}
-                            title="Story Arc Tracker"
-                            desc="Pick any ongoing story and AI builds a visual narrative: interactive timelines, key players mapped, and sentiment shifts tracked."
-                        />
-                    </div>
-
-                    <div className="mt-20 border-t border-zinc-800 pt-12 text-center">
-                        <Link href="/login">
-                            <Button className="bg-[#B31921] hover:bg-white hover:text-black rounded-none px-12 py-8 text-lg font-bold">
-                                BUILD MY PERSONALIZED NEWSROOM <ArrowRight className="ml-2" />
-                            </Button>
-                        </Link>
+                    <h2 className="text-6xl md:text-9xl font-serif font-black leading-[0.85] tracking-tighter mb-12">
+                        News is no longer <br />
+                        <span className="italic text-zinc-300">one-size-fits-all.</span>
+                    </h2>
+                    <p className="max-w-2xl text-xl font-medium text-zinc-500 leading-relaxed mb-12">
+                        Static articles are a relic of 2005. Welcome to a fundamentally different
+                        intelligence experience powered by Gemini 1.5 Pro and Vector Synthesis.
+                    </p>
+                    <div className="flex flex-wrap gap-4">
+                        <Button size="lg" className="bg-black text-white rounded-none h-16 px-10 font-bold tracking-widest uppercase text-xs">
+                            Experience My ET →
+                        </Button>
+                        <div className="flex items-center gap-2 px-6 text-[10px] font-black uppercase tracking-widest text-zinc-400 border border-zinc-200">
+                            <ShieldCheck size={14} className="text-primary" /> Verified Business Intel
+                        </div>
                     </div>
                 </div>
-            </section>
 
-            {/* 6. THE PREVIEW FEED */}
-            <section id="feed" className="bg-[#F4F4F4] py-24 px-8 border-t border-zinc-200">
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-16">
-                        <h3 className="font-serif text-4xl font-bold mb-4 italic">Latest in the Newsroom</h3>
-                        <p className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest">Automated Vector Matching Engine</p>
+                {/* --- THE 5 PILLARS OF 2026 NEWS --- */}
+                <section className="mt-40 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1px bg-zinc-200 border border-zinc-200">
+
+                    <FeatureCard
+                        icon={<BrainCircuit className="w-8 h-8 text-primary" />}
+                        tag="Feature 01"
+                        title="My ET: Personalized Newsroom"
+                        desc="A startup founder gets funding news; an investor gets portfolio moves. A fundamentally different experience for every user."
+                    />
+
+                    <FeatureCard
+                        icon={<Zap className="w-8 h-8 text-primary" />}
+                        tag="Feature 02"
+                        title="News Navigator"
+                        desc="Interactive briefings that synthesize 8+ articles into a single explorable document with real-time follow-up questions."
+                    />
+
+                    <FeatureCard
+                        icon={<PlayCircle className="w-8 h-8 text-primary" />}
+                        tag="Feature 03"
+                        title="AI Video Studio"
+                        desc="Instantly transform any breaking story into a broadcast-quality short video with narration and data visuals."
+                    />
+
+                    <FeatureCard
+                        icon={<History className="w-8 h-8 text-primary" />}
+                        tag="Feature 04"
+                        title="Story Arc Tracker"
+                        desc="Track the entire lifecycle of a business merger. Visual narratives, key player mapping, and contrarian sentiment."
+                    />
+
+                    <FeatureCard
+                        icon={<Languages className="w-8 h-8 text-primary" />}
+                        tag="Feature 05"
+                        title="Vernacular Engine"
+                        desc="Context-aware translation into Hindi, Tamil, and Telugu. Culturally adapted explanations, not just literal text."
+                    />
+
+                    <div className="bg-black p-12 flex flex-col justify-center text-white min-h-[400px]">
+                        <h4 className="text-3xl font-serif font-bold italic mb-6">"I can't go back to reading news the old way."</h4>
+                        <p className="text-[10px] font-black uppercase tracking-widest opacity-50">Chief Investment Officer, 2026</p>
                     </div>
-                    <NewsFeed isPersonalized={false} />
-                </div>
-            </section>
 
-            {/* 7. FOOTER */}
-            <footer className="py-12 border-t border-zinc-200 text-center bg-white">
-                <p className="text-[10px] font-bold text-zinc-400 tracking-[0.3em] uppercase">
-                    The AI Times © 2026 — Amaravati Edition — Powered by Gemini 1.5
-                </p>
+                </section>
+            </main>
+
+            {/* --- FOOTER --- */}
+            <footer className="border-t border-zinc-200 py-20 px-6 md:px-12 bg-white">
+                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-12">
+                    <div>
+                        <h3 className="text-2xl font-serif font-black tracking-tighter text-primary mb-4">ETAI</h3>
+                        <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest max-w-xs">
+                            Part of The Economic Times Digital Network. Powered by Google Gemini 1.5 Pro.
+                        </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-20">
+                        <FooterLinkGroup title="The Product" links={['My ET', 'Navigator', 'Video Studio']} />
+                        <FooterLinkGroup title="Legal" links={['Terms', 'Privacy', 'AI Ethics']} />
+                    </div>
+                </div>
             </footer>
-
-        </main>
-    );
-}
-
-function FeatureItem({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) {
-    return (
-        <div className="flex gap-5 items-start group cursor-pointer border-b border-zinc-100 pb-4 last:border-0">
-            <div className="mt-1 text-[#B31921] group-hover:scale-110 transition-transform">{icon}</div>
-            <div>
-                <h4 className="font-bold text-sm tracking-tight group-hover:text-[#B31921] transition-colors">{title}</h4>
-                <p className="text-xs text-zinc-500 leading-tight mt-1">{desc}</p>
-            </div>
         </div>
     );
 }
 
-function FeatureCard({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) {
+function FeatureCard({ icon, tag, title, desc }: { 
+    icon: React.ReactNode; 
+    tag: string; 
+    title: string; 
+    desc: string;
+}) {
+    return (
+        <div className="bg-white p-12 min-h-[400px] flex flex-col group cursor-default">
+            <div className="mb-auto">
+                <div className="mb-8">{icon}</div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-4">{tag}</p>
+                <h3 className="text-3xl font-serif font-black mb-6 group-hover:underline decoration-primary transition-all underline-offset-8">
+                    {title}
+                </h3>
+                <p className="text-zinc-500 font-medium leading-relaxed">{desc}</p>
+            </div>
+            <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest mt-8 group-hover:gap-4 transition-all">
+                Learn More <ArrowRight size={14} className="text-primary" />
+            </button>
+        </div>
+    )
+}
+
+function FooterLinkGroup({ title, links }: { title: string, links: string[] }) {
     return (
         <div className="space-y-4">
-            <div className="mb-6">{icon}</div>
-            <h4 className="text-2xl font-serif font-bold">{title}</h4>
-            <p className="text-zinc-400 text-sm leading-relaxed">{desc}</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{title}</p>
+            <ul className="space-y-2">
+                {links.map(link => (
+                    <li key={link} className="text-xs font-bold hover:text-primary cursor-pointer">{link}</li>
+                ))}
+            </ul>
         </div>
-    );
+    )
 }

@@ -4,10 +4,13 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { Newspaper, ShieldCheck, Zap, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { logger } from '@/lib/logger';
+import { isAuthError } from '@/lib/types';
+import * as Sentry from '@sentry/nextjs';
 
 export default function AuthPage() {
     const [email, setEmail] = useState('');
@@ -15,13 +18,14 @@ export default function AuthPage() {
     const [loading, setLoading] = useState(false);
     const [isSignUp, setIsSignUp] = useState(false);
     const router = useRouter();
+    const supabase = createClient();
 
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (loading) return;
         setLoading(true);
 
         try {
-            // 1. Perform Auth Action
             const { data, error } = isSignUp
                 ? await supabase.auth.signUp({
                     email,
@@ -35,29 +39,34 @@ export default function AuthPage() {
 
             if (error) throw error;
 
-            // 2. Success Logic
             if (data.user) {
-                console.log("Auth Success:", data.user.email);
+                logger.info("Auth Success", { email: data.user.email });
+                toast.success(isSignUp ? "Account created!" : "Welcome back!");
 
-                if (isSignUp && data.session === null) {
-                    // This handles the "Confirm Email" being ON in Supabase
-                    toast.success("Verification email sent! Check your inbox.");
-                } else {
-                    toast.success(isSignUp ? "Account created!" : "Welcome back!");
-
-                    // Use router.refresh() to ensure the server knows we are logged in
-                    router.refresh();
-
-                    // Delay slightly to allow cookies to settle
-                    setTimeout(() => {
-                        router.push(isSignUp ? '/onboarding' : '/dashboard');
-                    }, 500);
-                }
+                // Hard refresh to ensure cookies are synced with the server
+                setTimeout(() => {
+                    window.location.href = isSignUp ? '/onboarding' : '/dashboard';
+                }, 800);
             }
-        } catch (error: any) {
-            console.error("AUTH ERROR:", error.message);
-            toast.error(error.message);
-        } finally {
+        } catch (error) {
+            logger.error("Authentication error", error);
+            Sentry.captureException(error);
+            
+            let errorMessage = 'Authentication failed';
+            
+            if (isAuthError(error)) {
+                if (error.message.includes('rate_limit_exceeded') || error.status === 429) {
+                    errorMessage = 'Too many login attempts. Please try again later.';
+                } else if (error.message.includes('Invalid login credentials')) {
+                    errorMessage = 'Invalid email or password.';
+                } else {
+                    errorMessage = error.message;
+                }
+            } else if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            
+            toast.error(errorMessage);
             setLoading(false);
         }
     };
@@ -65,7 +74,7 @@ export default function AuthPage() {
     return (
         <div className="min-h-screen bg-[#FDFDFD] text-[#1A1A1A] flex flex-col items-center justify-center p-6">
             <div className="mb-12 text-center">
-                <h1 className="text-5xl font-serif font-black tracking-tighter text-[#B31921]">
+                <h1 className="text-5xl font-serif font-black tracking-tighter text-primary">
                     THE AI TIMES
                 </h1>
                 <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-400 mt-2">
@@ -73,7 +82,7 @@ export default function AuthPage() {
                 </p>
             </div>
 
-            <div className="w-full max-w-md bg-white border-t-8 border-[#B31921] shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-10 relative overflow-hidden">
+            <div className="w-full max-w-md bg-white border-t-8 border-primary shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-10 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')]" />
 
                 <div className="relative z-10">
@@ -95,7 +104,7 @@ export default function AuthPage() {
                                 placeholder="name@company.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="rounded-none border-zinc-200 focus:border-[#B31921] focus:ring-0 bg-zinc-50/50"
+                                className="rounded-none border-zinc-200 focus:border-primary focus:ring-0 bg-zinc-50/50"
                                 required
                             />
                         </div>
@@ -107,14 +116,14 @@ export default function AuthPage() {
                                 placeholder="Min. 6 characters"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="rounded-none border-zinc-200 focus:border-[#B31921] focus:ring-0 bg-zinc-50/50"
+                                className="rounded-none border-zinc-200 focus:border-primary focus:ring-0 bg-zinc-50/50"
                                 required
                             />
                         </div>
 
                         <Button
                             type="submit"
-                            className="w-full bg-[#B31921] hover:bg-black text-white rounded-none font-bold py-7 tracking-[0.2em] transition-all disabled:opacity-50"
+                            className="w-full bg-primary hover:bg-black text-white rounded-none font-bold py-7 tracking-[0.2em] transition-all disabled:opacity-50"
                             disabled={loading}
                         >
                             {loading ? (
@@ -131,7 +140,7 @@ export default function AuthPage() {
                         <button
                             type="button"
                             onClick={() => setIsSignUp(!isSignUp)}
-                            className="text-[10px] font-bold text-zinc-400 hover:text-[#B31921] uppercase tracking-widest transition-colors"
+                            className="text-[10px] font-bold text-zinc-400 hover:text-primary uppercase tracking-widest transition-colors"
                         >
                             {isSignUp ? 'Already a member? Sign In' : "New to AI Times? Create an account"}
                         </button>
@@ -150,7 +159,7 @@ export default function AuthPage() {
 function AuthFeature({ icon, text }: { icon: React.ReactNode, text: string }) {
     return (
         <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-tighter text-zinc-400">
-            <span className="text-[#B31921]">{icon}</span>
+            <span className="text-primary">{icon}</span>
             {text}
         </div>
     );

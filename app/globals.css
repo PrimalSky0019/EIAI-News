@@ -5,23 +5,20 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  /* ... your other variables ... */
-
-  /* ADD THIS LINE BELOW to map the color */
+  /* Base theme colors */
   --color-border: var(--border);
-
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
   --color-ring: var(--ring);
+  
+  /* Brand color - The AI Times signature red */
+  --color-brand: #B31921;
+  --color-brand-foreground: #ffffff;
 }
-
-/* ... keep your :root and .dark blocks as they are ... */
 
 @layer base {
   * {
-    /* Change 'border-border' to 'border-[var(--border)]'
-       OR just use 'border' if you've mapped it in the theme above */
     border-color: var(--border);
     outline-color: var(--ring);
   }
@@ -29,3 +26,9 @@
     @apply bg-background text-foreground antialiased;
   }
 }
+
+/* Brand color utility classes
+   Usage: bg-brand, text-brand, border-brand
+   Note: Current design uses hardcoded #B31921 for consistency.
+   Use 'brand' color for new components.
+*/

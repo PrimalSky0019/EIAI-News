@@ -2,67 +2,74 @@
 
 import { embed } from 'ai';
 import { google } from '@ai-sdk/google';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
+import { logger, formatErrorMessage } from '@/lib/logger';
+import type { ServerActionResponse } from '@/lib/types';
+import * as Sentry from '@sentry/nextjs';
 
-export async function updatePersonalizedFeed(topics: string[]) {
-    // 1. Await cookies (Required in modern Next.js)
-    const cookieStore = await cookies();
+export const runtime = 'edge';
 
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                get(name: string) {
-                    return cookieStore.get(name)?.value;
-                },
-                // Added set/remove so the client can handle sessions correctly
-                set(name, value, options) {
-                    cookieStore.set({ name, value, ...options });
-                },
-                remove(name, options) {
-                    cookieStore.set({ name, value: '', ...options });
-                },
-            },
-        }
-    );
+/**
+ * Updates user's personalized feed preferences with AI-generated embeddings
+ * @param topics - Array of interest topics selected by the user
+ * @returns Server action response with success/error status
+ */
+export async function updatePersonalizedFeed(
+  topics: string[]
+): ServerActionResponse<void> {
+  const supabase = await createClient();
 
-    // 2. Get User
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+  // Validate input
+  if (!topics || topics.length === 0) {
+    return { success: false, error: 'Please select at least one interest topic' };
+  }
 
-    if (authError || !user) {
-        return { success: false, error: "Authentication failed. Please log in again." };
+  // Get authenticated user
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    logger.error('Authentication failed in updatePersonalizedFeed', authError);
+    if (authError) Sentry.captureException(authError);
+    return { success: false, error: 'Authentication failed. Please log in again.' };
+  }
+
+  try {
+    // Generate context description for embedding
+    const interestDescription = 
+      `A business professional interested in: ${topics.join(', ')}. ` +
+      'Focus on market impacts and strategic moves.';
+
+    // Generate 768-dimensional vector embedding
+    const { embedding } = await embed({
+      model: google.textEmbeddingModel('text-embedding-004'),
+      value: interestDescription,
+    });
+
+    // Update user profile with new preferences
+    const { error: dbError } = await supabase
+      .from('profiles')
+      .update({
+        preference_embedding: embedding,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id);
+
+    if (dbError) {
+      logger.error('Database error in updatePersonalizedFeed', dbError);
+      Sentry.captureException(dbError);
+      return { success: false, error: 'Failed to save preferences' };
     }
 
-    try {
-        // 3. Generate a "Context Sentence" for Gemini
-        const interestDescription = `A business professional interested in: ${topics.join(', ')}. Focus on market impacts and strategic moves.`;
+    logger.info('Successfully updated user preferences', { 
+      userId: user.id, 
+      topicsCount: topics.length 
+    });
+    
+    return { success: true, message: 'Preferences updated successfully' };
 
-        // 4. Generate the Vector Embedding (768 dimensions)
-        const { embedding } = await embed({
-            model: google.textEmbeddingModel('text-embedding-004'),
-            value: interestDescription,
-        });
-
-        // 5. Save to Supabase 'profiles' table
-        const { error: dbError } = await supabase
-            .from('profiles')
-            .update({
-                preference_embedding: embedding,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', user.id);
-
-        if (dbError) {
-            console.error("Database Error:", dbError);
-            return { success: false, error: dbError.message };
-        }
-
-        return { success: true };
-
-    } catch (error) {
-        console.error("AI Embedding Error:", error);
-        return { success: false, error: "Failed to analyze interests with AI." };
-    }
+  } catch (error) {
+    logger.error('AI Embedding error in updatePersonalizedFeed', error);
+    Sentry.captureException(error);
+    return { success: false, error: formatErrorMessage(error) };
+  }
 }

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Menu, X, LogOut, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
 export default function DashboardShell({
@@ -14,6 +14,7 @@ export default function DashboardShell({
     userEmail: string | undefined
 }) {
     const router = useRouter()
+    const supabase = createClient()
 
     const handleLogout = async () => {
         await supabase.auth.signOut()
@@ -26,7 +27,7 @@ export default function DashboardShell({
             {/* Sidebar / Header logic goes here */}
             <header className="border-b-4 border-black bg-white sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                    <h1 className="text-2xl font-serif font-black tracking-tighter text-[#B31921]">
+                    <h1 className="text-2xl font-serif font-black tracking-tighter text-primary">
                         MY <span className="text-black text-3xl italic">ET</span>
                     </h1>
 
@@ -38,7 +39,7 @@ export default function DashboardShell({
                         <Button
                             variant="ghost"
                             onClick={handleLogout}
-                            className="hover:text-[#B31921] font-bold text-xs uppercase"
+                            className="hover:text-primary font-bold text-xs uppercase"
                         >
                             <LogOut className="mr-2 h-4 w-4" /> Sign Out
                         </Button>

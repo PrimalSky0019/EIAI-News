@@ -1,38 +1,62 @@
-'use server' // This tells Next.js to NEVER send this code to the browser (keeps API keys safe)
+'use server'
 
 import { embed } from 'ai';
 import { google } from '@ai-sdk/google';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/server';
+import { logger, formatErrorMessage } from '@/lib/logger';
+import type { ServerActionResponse } from '@/lib/types';
 
-// This function takes a raw news article and turns it into AI-searchable data
-export async function ingestArticle(title: string, content: string, category: string) {
-    try {
-        // 1. The Magic: Ask Gemini to turn the article text into a mathematical vector
-        // We use the text-embedding-004 model which outputs a 768-dimensional vector
-        const { embedding } = await embed({
-            model: google.textEmbeddingModel('text-embedding-004'),
-            value: `Title: ${title}\n\nContent: ${content}`,
-        });
+export const runtime = 'edge';
 
-        // 2. Save everything to Supabase (Title, Content, Category, AND the Vector)
-        const { data, error } = await supabase
-            .from('articles')
-            .insert({
-                title: title,
-                content: content,
-                category: category,
-                embedding: embedding, // This is the array of 768 numbers!
-            });
+/**
+ * Ingests a news article and generates AI vector embeddings
+ * @param title - Article title
+ * @param content - Article content
+ * @param category - Article category (e.g., "Markets", "Technology")
+ * @returns Server action response with success/error status
+ */
+export async function ingestArticle(
+  title: string, 
+  content: string, 
+  category: string
+): ServerActionResponse<void> {
+  const supabase = await createClient();
 
-        if (error) {
-            console.error("Supabase Error:", error);
-            throw new Error("Failed to save to database");
-        }
+  // Validate input
+  if (!title || !content || !category) {
+    return { success: false, error: 'Title, content, and category are required' };
+  }
+  
+  try {
+    // Generate 768-dimensional vector embedding using Gemini
+    const { embedding } = await embed({
+      model: google.textEmbeddingModel('text-embedding-004'),
+      value: `Title: ${title}\n\nContent: ${content}`,
+    });
 
-        return { success: true, message: 'Article ingested and vectorized successfully!' };
+    // Save article with vector embedding to Supabase
+    const { error } = await supabase
+      .from('articles')
+      .insert({
+        title,
+        content,
+        category,
+        embedding,
+      });
 
-    } catch (error) {
-        console.error('Error ingesting article:', error);
-        return { success: false, error: 'Failed to process the article' };
+    if (error) {
+      logger.error('Supabase insert error in ingestArticle', error);
+      return { success: false, error: 'Failed to save article to database' };
     }
+
+    logger.info('Successfully ingested article', { title, category });
+    return { 
+      success: true, 
+      message: 'Article ingested and vectorized successfully!' 
+    };
+
+  } catch (error) {
+    logger.error('Error ingesting article', error);
+    return { success: false, error: formatErrorMessage(error) };
+  }
 }
