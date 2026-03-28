@@ -14,8 +14,8 @@ const data = [
 
 export function AnalyticsChart() {
     return (
-        <div className="h-[250px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
+        <div className="h-[250px] w-full min-h-[250px]" style={{ minHeight: 250 }}>
+            <ResponsiveContainer width="100%" height="100%" minHeight={250} minWidth={100}>
                 <AreaChart data={data}>
                     <defs>
                         <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
