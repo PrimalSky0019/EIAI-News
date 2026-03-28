@@ -7,8 +7,6 @@ import { logger, formatErrorMessage } from '@/lib/logger';
 import type { ServerActionResponse } from '@/lib/types';
 import * as Sentry from '@sentry/nextjs';
 
-export const runtime = 'edge';
-
 /**
  * Updates user's personalized feed preferences with AI-generated embeddings
  * @param topics - Array of interest topics selected by the user

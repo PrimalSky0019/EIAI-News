@@ -6,8 +6,6 @@ import { createClient } from '@/lib/supabase/server';
 import { logger, formatErrorMessage } from '@/lib/logger';
 import type { ServerActionResponse } from '@/lib/types';
 
-export const runtime = 'edge';
-
 /**
  * Ingests a news article and generates AI vector embeddings
  * @param title - Article title
