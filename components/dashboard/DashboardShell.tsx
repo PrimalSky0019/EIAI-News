@@ -7,6 +7,7 @@ import {
     Search, Bell, User, LogOut, Menu, X
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import GlobalCommandBar from './GlobalCommandBar'
 
 export default function DashboardShell({
     children,
@@ -147,7 +148,7 @@ export default function DashboardShell({
             )}
 
             {/* Main Content Area */}
-            <main className="w-full bg-[#f8f9fa] pt-6 pb-20">
+            <main className="w-full bg-[#f8f9fa] pt-6 pb-32">
                 <div className="max-w-7xl mx-auto px-4">
                     {children}
                 </div>
@@ -166,6 +167,9 @@ export default function DashboardShell({
                      </div>
                  </div>
             </footer>
+
+            {/* Floating AI Agent Command Bar */}
+            <GlobalCommandBar />
         </div>
     )
 }

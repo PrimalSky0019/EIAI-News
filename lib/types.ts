@@ -74,3 +74,26 @@ export const AUTH_ERROR_CODES = {
   EMAIL_NOT_CONFIRMED: 'email_not_confirmed',
   WEAK_PASSWORD: 'weak_password',
 } as const;
+
+// Agent types
+export interface AgentMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  actions?: string[];
+  timestamp?: Date;
+}
+
+export type AgentToolName =
+  | 'searchNews'
+  | 'getNewsByCategory'
+  | 'semanticSearch'
+  | 'getUserPreferences'
+  | 'fetchLiveNews'
+  | 'ingestToDatabase';
+
+export interface AgentResult {
+  success: boolean;
+  briefing?: string;
+  error?: string;
+  actionsTaken?: string[];
+}
