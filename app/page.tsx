@@ -4,6 +4,7 @@ import {
     Zap, BrainCircuit, PlayCircle,
     History, Languages, ArrowRight, ShieldCheck
 } from "lucide-react";
+import { HeroButtons } from '@/components/HeroButtons';
 
 export default function LandingPage() {
     return (
@@ -42,11 +43,9 @@ export default function LandingPage() {
                         Static articles are a relic of 2005. Welcome to a fundamentally different
                         intelligence experience powered by Gemini 1.5 Pro and Vector Synthesis.
                     </p>
-                    <div className="flex flex-wrap gap-4">
-                        <Button size="lg" className="bg-black text-white rounded-none h-16 px-10 font-bold tracking-widest uppercase text-xs">
-                            Experience My ET →
-                        </Button>
-                        <div className="flex items-center gap-2 px-6 text-[10px] font-black uppercase tracking-widest text-zinc-400 border border-zinc-200">
+                    <div className="flex flex-wrap gap-4 items-center">
+                        <HeroButtons />
+                        <div className="flex items-center gap-2 px-6 h-14 text-[10px] font-black uppercase tracking-widest text-zinc-400 border border-zinc-200 rounded-full">
                             <ShieldCheck size={14} className="text-primary" /> Verified Business Intel
                         </div>
                     </div>

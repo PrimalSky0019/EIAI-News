@@ -25,7 +25,7 @@ export function HeroButtons() {
 
     return (
         <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button size="lg" className="h-14 px-10 text-lg bg-blue-600 hover:bg-blue-700 rounded-full shadow-lg shadow-blue-500/20" onClick={() => router.push('/login')}>
+            <Button size="lg" className="h-14 px-10 text-lg bg-primary hover:bg-black text-white rounded-full shadow-lg shadow-primary/20 font-bold tracking-widest uppercase" onClick={() => router.push('/login')}>
                 Build My Feed
             </Button>
             <Button size="lg" variant="outline" className="h-14 px-10 text-lg rounded-full border-zinc-800 hover:bg-zinc-900" onClick={handleTestIngest}>
