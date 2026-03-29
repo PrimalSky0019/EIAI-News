@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import DashboardShell from '@/components/dashboard/DashboardShell'
 import { TrendingUp, Activity, Zap, Clock, ChevronRight, Newspaper, BrainCircuit } from 'lucide-react'
+import LiveNewsSync from './LiveNewsSync'
 
 // Dynamic category-based images from Unsplash
 const CATEGORY_IMAGES: Record<string, string> = {
@@ -252,7 +253,9 @@ export default async function DashboardPage() {
                     )}
 
                 </div>
-
+                
+                {/* Background synchronization driver for the live AI feed */}
+                <LiveNewsSync />
             </div>
         </DashboardShell>
     )
